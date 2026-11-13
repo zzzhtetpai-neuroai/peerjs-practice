@@ -171,13 +171,19 @@ function PhoneView({ pcId }: { pcId: string }) {
 
         peer.on('open', () => {
           if (!peer || !localStream) return
-          // Send video
-          peer.call(pcId, localStream)
-          // Open a text channel
-          const conn = peer.connect(pcId)
+          // 1) Open the text channel first
+          const conn = peer.connect(pcId, { reliable: true })
           connRef.current = conn
-          conn.on('open', () => setStatus('connected'))
+          conn.on('open', () => {
+            setStatus('connected')
+            // 2) Then send the video
+            if (peer && localStream) peer.call(pcId, localStream)
+          })
           conn.on('close', () => setStatus('disconnected'))
+          conn.on('error', (err) => {
+            setStatus('error')
+            setErrorMsg(err.message)
+          })
         })
 
         peer.on('error', (err) => {
