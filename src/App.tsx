@@ -170,7 +170,7 @@ function PhoneView({ pcId }: { pcId: string }) {
         peerRef.current = peer
 
         peer.on('open', () => {
-          if (!peer || !localStream) return
+          if (!peer) return
           // 1) Open the text channel first
           const conn = peer.connect(pcId, { reliable: true })
           connRef.current = conn
@@ -188,7 +188,7 @@ function PhoneView({ pcId }: { pcId: string }) {
 
         peer.on('error', (err) => {
           setStatus('error')
-          setErrorMsg(err.type)
+          setErrorMsg(err.message)
         })
       })
       .catch((err: unknown) => {
@@ -230,13 +230,13 @@ function PhoneView({ pcId }: { pcId: string }) {
   }[status]
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white p-4 space-y-4">
+    <div className="min-h-screen bg-slate-950 text-white p-4 pb-32 space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">PeerJS ライブカメラ（スマホ）</h1>
         <span className={`${statusLabel.color} text-sm px-3 py-1 rounded-full`}>{statusLabel.text}</span>
       </div>
 
-      <div className="bg-black rounded-2xl overflow-hidden aspect-[3/4]">
+      <div className="bg-black rounded-2xl overflow-hidden h-[40vh]">
         {stream ? (
           <VideoTile stream={stream} />
         ) : (
@@ -269,9 +269,10 @@ function PhoneView({ pcId }: { pcId: string }) {
         {QUICK_MESSAGES.map((m) => (
           <button
             key={m}
+            type="button"
             onClick={() => send(m)}
             disabled={status !== 'connected'}
-            className="bg-slate-800 active:bg-slate-700 rounded-xl py-3 text-xl disabled:opacity-50"
+            className="bg-slate-800 active:bg-slate-700 active:scale-95 transition rounded-xl py-4 text-2xl disabled:opacity-50 touch-manipulation"
           >
             {m}
           </button>
@@ -279,6 +280,7 @@ function PhoneView({ pcId }: { pcId: string }) {
       </div>
 
       <button
+        type="button"
         onClick={disconnect}
         disabled={status === 'disconnected'}
         className="w-full bg-red-600 rounded-xl py-3 font-bold disabled:opacity-50"
